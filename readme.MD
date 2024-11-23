@@ -6,7 +6,7 @@
 
   
 
-This repository contains code and data for my article "[From LangChain to LangGraph: Making the Multi-Model DrugBot Simple, Personal, and Teachable](https://dgg32.medium.com/tailor-a-multi-model-chatbot-for-a-multi-model-duckdb-8afb7ac4c1fa)".
+This repository contains code and data for my article "[From LangChain to LangGraph: Making the Multi-Model DrugBot Simple, Personal, and Teachable](https://dgg32.medium.com/from-langchain-to-langgraph-making-the-multi-model-drugbot-personal-and-teachable-9ef20055efb4)".
 
 
 

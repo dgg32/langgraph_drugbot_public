@@ -1,0 +1,41 @@
+double blind & Alzheimer's disease
+
+What diseases can fluocinolone acetonide treat? Show me 4 results. Use the graph query.
+
+What diseases can hydroflumethiazide treat?
+
+What is the MOA of hydroflumethiazide?
+
+Show 5 liver-related disorder?
+
+What is the MOA of tretoquinol?
+
+What is Fascioliasis?
+
+Show 5 trials that tested drugs against the top 7 liver-related disorders
+
+What disorder can this drug treat?
+
+
+Colorectal Neoplasms, Peritoneal Neoplasms, Uterine Cervical Neoplasm belong to "Class A diseases". Give me 5 drugs that may treat the Class A diseases
+
+
+Colorectal Neoplasms, Peritoneal Neoplasms, Uterine Cervical Neoplasm belong to "Class A diseases". List the Class A diseases' definitions.  using sql
+
+
+The "Three Small Players" pharmaceutical companies are Astellas, Novartis, and ViiV
+
+Tabulate the amount of trials sponsored by "the Three small Players".
+
+
+
+We also define "the Market leader" company as GSK
+
+
+Calculate the amount of trials sponsored by the market leader.
+
+
+'Four Horsemen' are cardiovascular diseases, carcinoma, alzheimer's disease, and diabetes mellitus
+
+
+ cardiovascular diseases, carcinoma, Alzheimer's disease, and diabetes mellitus as the 'Four Horsemen Diseases'

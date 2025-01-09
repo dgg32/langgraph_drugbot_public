@@ -45,8 +45,7 @@ def display_assistant_message(message: AIMessage, user_question: str = None) -> 
                     
                     if isinstance(args, dict):
                         query = (args.get('executed_query') or 
-                               args.get('query') or 
-                               args.get('my_question'))
+                               args.get('query'))
                     elif isinstance(args, str):
                         query = args
                     
@@ -78,7 +77,7 @@ def display_message_pair(messages: list, i: int) -> bool:
         bool: True if an assistant message was displayed after the user message
     """
 
-    #print ("messages[i],", i, messages[i])
+    #print ("+++++++display_message_pair+++++++++ messages[i]", messages[i])
 
     question = ""
     if isinstance(messages[i], HumanMessage):
@@ -96,9 +95,10 @@ def display_chat_messages() -> None:
     """
     Display all chat messages with appropriate styling and separation.
     """
+    #print ("+++++++display_chat_messages+++++++++ st.session_state", st.session_state)
     messages = st.session_state.messages
 
-    #print ("+++++++display_chat_messages+++++++++", messages)
+    #print ("+++++++display_chat_messages+++++++++", st.session_state)
     i = 0
     while i < len(messages):
         assistant_displayed = display_message_pair(messages, i)

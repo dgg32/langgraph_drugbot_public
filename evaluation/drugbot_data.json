@@ -1,0 +1,82 @@
+[
+  {
+    "question": "What is the MOA of hydroflumethiazide?",
+    "generated_answer": "Sure, here is the information formatted into a sentence:\n\nThe mechanism of action (MOA) of hydroflumethiazide (CUI: C0020273) is that it belongs to the class of \"Sodium Chloride Symporter Inhibitors\".",
+    "expected_answer": "Sodium Chloride Symporter Inhibitors"
+  },
+  {
+    "question": "What diseases can hydroflumethiazide treat?",
+    "generated_answer": "Sure, here are the results formatted into sentences:\n\nHydroflumethiazide (CUI: C0020273) can treat the following diseases:\n1. Nephrotic Syndrome\n2. Hypertensive disease\n3. Heart failure\n4. Edema\n5. Glomerulonephritis\n6. Kidney Failure\n7. Liver Cirrhosis",
+    "expected_answer": "Hypertensive disease, Glomerulonephritis, Heart failure, Edema, Kidney Failure, Nephrotic Syndrome, Liver Cirrhosis"
+  },
+  {
+    "question": "Can fluocinolone acetonide treat Facial Dermatoses?",
+    "generated_answer": "Sure, I can format the information into sentences for easy understanding:\n\n---\n\n### Query Result:\n\n- **Drug:** fluocinolone acetonide\n- **Condition:** Facial Dermatoses\n\n### Interpretation:\n\nThe query result indicates that \"fluocinolone acetonide\" has a relationship with \"Facial Dermatoses.\"\n\n---\n\nIf you prefer a table format, here it is:\n\n| Drug                  | Condition          |\n|-----------------------|--------------------|\n| fluocinolone acetonide | Facial Dermatoses  |\n\n---\n\nThis presentation maintains the integrity of the original data from the query result.",
+    "expected_answer": "Yes"
+  },
+  {
+    "question": "What is the MOA of abiraterone?",
+    "generated_answer": "To understand the mechanism of action (MOA) of abiraterone (CUI: C0754011), here are the results formatted into sentences:\n\n1. Abiraterone acts as a \"Cytochrome P450 2C8 Inhibitors\".\n2. Abiraterone acts as a \"Cytochrome P450 2D6 Inhibitors\".\n3. Abiraterone acts as a \"Cytochrome P450 17A1 Inhibitors\".\n\nAlternatively, the results can be presented in a table format:\n\n| Mechanism of Action                          |\n|----------------------------------------------|\n| Cytochrome P450 2C8 Inhibitors               |\n| Cytochrome P450 2D6 Inhibitors               |\n| Cytochrome P450 17A1 Inhibitors              |\n\nThese results indicate the specific cytochrome P450 enzymes that abiraterone inhibits.",
+    "expected_answer": "Cytochrome P450 17A1 Inhibitors, Cytochrome P450 2D6 Inhibitors, Cytochrome P450 2C8 Inhibitors"
+  },
+  {
+    "question": "double blind & Alzheimer's disease",
+    "generated_answer": "Here are the results formatted into sentences for better understanding:\n\n1. A Preliminary, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease. (Score: 4.241119052925081)\n2. A 15-week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease. (Score: 4.241119052925081)\n3. A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease. (Score: 4.241119052925081)\n4. A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease. (Score: 4.241119052925081)\n5. A 54-week, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Effects of Donepezil Hydrochloride (E2020) on Functional Outcomes in Patients with Alzheimer's Disease. (Score: 4.148404157417646)\n6. A Randomized, Double-Blind, Placebo-Controlled Evaluation of the Effects of Donepezil Hydrochloride (E2020) in the Management of Patients with Alzheimer's Disease in a Nursing Home Facility. (Score: 4.059656212167762)\n7. Efficacy and Safety of the Rivastigmine Transdermal Patch in Patients With Probable Alzheimer's Disease. (Score: 3.949404716274111)\n8. Clinical efficacy and safety of donepezil on cognitive and global function in patients with Alzheimer's disease. A 24-week, multicenter, double-blind, placebo-controlled study in Japan. (Score: 3.893084565453792)\n9. A 24-weeks, Multi-center, Randomized, Double-blind, Placebo Controlled Study to Evaluate the Efficacy and Safety of Donepezil Hydrochloride in Chinese Subjects With Severe Alzheimer's Disease. (Score: 3.814821642474924)\n10. A 24-Week Efficacy, Safety and Tolerability of Rivastigmine Patch Study in Patients With Probable Alzheimer's Disease. (Score: 3.760182960813248)",
+    "expected_answer": "'A Preliminary, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 15-week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 54-week, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Effects of Donepezil Hydrochloride (E2020) on Functional Outcomes in Patients with Alzheimer's Disease.'"
+  },
+  {
+    "question": "What drug may treat type 2 diabetes?",
+    "generated_answer": "No results found.",
+    "expected_answer": "glibenclamide, insulin (human), acarbose, dulaglutide, insulin lispro, acetohexamide, insulin degludec, insulin aspart, linagliptin, pioglitazone, glimepiride, insulin glargine, empagliflozin, pramlintide, miglitol, repaglinide, tirzepatide, lixisenatide, rosiglitazone, insulin glulisine, glipizide, tolbutamide, tolazamide, canagliflozin, alogliptin, dapagliflozin, chlorpropamide, exenatide, saxagliptin, metformin"
+  },
+  {
+    "question": "What drug may treat \u591a\u767a\u51fa\u8840\u6027\u8089\u816b?",
+    "generated_answer": "Certainly! Here are the results formatted into sentences for better understanding:\n\n1. Vinblastine may treat Kaposi Sarcoma.\n2. Dactinomycin may treat Kaposi Sarcoma.\n3. Peginterferon alfa-2b may treat Kaposi Sarcoma.\n4. Alitretinoin may treat Kaposi Sarcoma.\n5. Etoposide may treat Kaposi Sarcoma.\n6. Interferon alfa-2b may treat Kaposi Sarcoma.\n7. Interferon alfa-2a may treat Kaposi Sarcoma.\n8. Peginterferon alfa-2a may treat Kaposi Sarcoma.\n9. Paclitaxel may treat Kaposi Sarcoma.\n10. Interferon alfacon-1 may treat Kaposi Sarcoma.\n11. Vinblastine sulfate may treat Kaposi Sarcoma.\n12. Doxorubicin hydrochloride liposome may treat Kaposi Sarcoma.\n\nAlternatively, here is the information presented in a table:\n\n| Drug                              |\n|-----------------------------------|\n| Vinblastine                       |\n| Dactinomycin                      |\n| Peginterferon alfa-2b             |\n| Alitretinoin                      |\n| Etoposide                         |\n| Interferon alfa-2b                |\n| Interferon alfa-2a                |\n| Peginterferon alfa-2a             |\n| Paclitaxel                        |\n| Interferon alfacon-1              |\n| Vinblastine sulfate               |\n| Doxorubicin hydrochloride liposome|\n\nThese drugs may treat Kaposi Sarcoma (CUI: C0036220).",
+    "expected_answer": "vinblastine, dactinomycin, peginterferon alfa-2b, alitretinoin, etoposide, interferon alfa-2b, interferon alfa-2a, peginterferon alfa-2a, paclitaxel, interferon alfacon-1, vinblastine sulfate, doxorubicin hydrochloride liposome"
+  },
+  {
+    "question": "\u591a\u767a\u51fa\u8840\u6027\u8089\u816b\u306e\u6cbb\u7642\u85ac\u306b\u3064\u3044\u3066?",
+    "generated_answer": "Sure, here are the results formatted into a table for better understanding:\n\n| Treatment for Kaposi Sarcoma (CUI: C0036220)            |\n|---------------------------------------------------------|\n| vinblastine                                              |\n| dactinomycin                                             |\n| peginterferon alfa-2b                                    |\n| alitretinoin                                             |\n| etoposide                                                |\n| interferon alfa-2b                                       |\n| interferon alfa-2a                                       |\n| peginterferon alfa-2a                                    |\n| paclitaxel                                               |\n| interferon alfacon-1                                     |\n| vinblastine sulfate                                      |\n| doxorubicin hydrochloride liposome                       |\n\nThese are the treatment options for Kaposi Sarcoma according to the provided query results.",
+    "expected_answer": "vinblastine, dactinomycin, peginterferon alfa-2b, alitretinoin, etoposide, interferon alfa-2b, interferon alfa-2a, peginterferon alfa-2a, paclitaxel, interferon alfacon-1, vinblastine sulfate, doxorubicin hydrochloride liposome"
+  },
+  {
+    "question": "What disorder can 1,1-Dimethylbiguanide treat?",
+    "generated_answer": "Certainly! Here is the information formatted into sentences for better readability:\n\nMetformin (CUI: C0025598) can be used to treat the following disorder: \n\n- \"Diabetes Mellitus, Non-Insulin-Dependent\"\n\nAlternatively, here is the information presented in a table format:\n\n| Medication (CUI)        | Disorder Treated                      |\n|-------------------------|----------------------------------------|\n| Metformin (CUI: C0025598)| Diabetes Mellitus, Non-Insulin-Dependent |\n\nThis ensures that the quoted strings from the query result remain unchanged.",
+    "expected_answer": "Diabetes Mellitus, Non-Insulin-Dependent"
+  },
+  {
+    "question": "What diseases can aflibercept treat?",
+    "generated_answer": "Here are the diseases that aflibercept (CUI: C1134659) can treat:\n\n1. \"Macular retinal edema\"\n2. \"Diabetic Retinopathy\"",
+    "expected_answer": "macular edema and diabetic retinopathy"
+  },
+  {
+    "question": "Which substances can be used to treat Macular Edema?",
+    "generated_answer": "Sure, here is the information formatted into sentences:\n\nThe substances that can be used to treat Macular retinal edema (CUI: C0271051) are:\n\n1. Flurbiprofen\n2. Aflibercept\n3. Ranibizumab",
+    "expected_answer": "flurbiprofen, ranibizumab and aflibercept"
+  },
+  {
+    "question": "What ATC category does donepezil have?",
+    "generated_answer": "Here is the formatted result based on the given query:\n\n**Question:**\nWhat ATC category does donepezil (CUI: C0527316) have?\n\n**Answer:**\nDonepezil (CUI: C0527316) belongs to the \"Cholinesterase Inhibitors\" category.",
+    "expected_answer": "N06DA02"
+  },
+  {
+    "question": "What kind of MOA does donepezil have?",
+    "generated_answer": "Donepezil (CUI: C0527316) has the following mechanism of action (MOA):\n\n- It belongs to the class of \"Cholinesterase Inhibitors\".",
+    "expected_answer": "Cholinesterase Inhibitors"
+  },
+  {
+    "question": "Do acetohexamide and pioglitazone share an MOA? If yes, what is it?",
+    "generated_answer": "Based on the query results, it appears that acetohexamide (CUI: C0000992) and pioglitazone (CUI: C0071097) share a mechanism of action (MOA). Both are classified under \"Insulin Receptor Agonists.\"\n\nIn sentence form:\nAcetohexamide and pioglitazone share a mechanism of action. They are both classified as \"Insulin Receptor Agonists.\"\n\nIn table form:\n\n| Drug          | CUI       | Mechanism of Action      |\n|---------------|-----------|--------------------------|\n| Acetohexamide | C0000992  | Insulin Receptor Agonists|\n| Pioglitazone  | C0071097  | Insulin Receptor Agonists|",
+    "expected_answer": "Insulin Receptor Agonists"
+  },
+  {
+    "question": "Give me a substance that may treat Type 1 Diabetes and has \"glargine\" in its name",
+    "generated_answer": "Sure, here is the information formatted into a table and sentences:\n\n### Table Format\n\n| Substance Name       |\n|----------------------|\n| insulin glargine     |\n\n### Sentence Format\n\nThe substance that may treat Diabetes Mellitus, Insulin-Dependent (CUI: C0011854) and has 'glargine' in its name is 'insulin glargine'.",
+    "expected_answer": "insulin glargine"
+  },
+  {
+    "question": "Which substance that may treat Type 1 Diabetes but does not have the MOA Insulin Receptor Agonists",
+    "generated_answer": "",
+    "expected_answer": "pramlintide"
+  }
+]

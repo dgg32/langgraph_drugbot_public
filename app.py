@@ -1,10 +1,15 @@
 # File: app.py
 
+## It has two states: 
+## 1. from LangGraph, for internal sanitization, UMLS expansion. The sanitized will only be shown in the comment section of the sql
+## 2. from st.session_state, this is for UI to display the original question and the final answer.
+
 from config import init_session_state, add_button_styles
 from ui.chat_display import display_chat_messages
 from ui.query_confirmation import create_query_confirmation_ui
 from langchain.schema import HumanMessage
 import streamlit as st
+import json
 from utils.my_langchain_tools import *
 from utils.error_handler import handle_query_error, clear_error_state, clear_confirmation_state
 from utils.message_handler import store_ai_message
@@ -12,7 +17,8 @@ from utils.chain_processor import process_chain_response
 import my_db_specifics
 from langchain_core.messages import ToolMessage, AIMessage
 import graph_definition as gd
-
+import os
+#from copy import deepcopy
 
 config = {"configurable": {"thread_id": "1", "user_id": "sixing"}}
 
@@ -38,14 +44,17 @@ load_examples()
 
 def create_example_buttons():
     """Create buttons for example queries in a single column"""
+
     for idx, example in enumerate(EXAMPLE_QUERIES):
         if st.button(
             example["input"], 
             key=f"example_{idx}",
             use_container_width=True,
         ):
+            
             handle_example_query(example)
             st.rerun()
+
 
 
 def handle_example_query(example):
@@ -64,9 +73,8 @@ def handle_example_query(example):
 def process_confirmed_query(query):
     """Process a confirmed query and store the response"""
     with st.spinner("Processing confirmed query..."):
-        #print ("I am in process_confirmed_query. curre_chain_input", st.session_state.current_chain_input)
         #print ("hello", query)
-
+        
         #print ("in if prompt", app.get_state(config))
 
         tool_name = st.session_state.tool_name
@@ -80,12 +88,9 @@ def process_confirmed_query(query):
             }
         ]
 
-        #print ("tool_message", tool_message)
         gd.app.update_state(config, {"messages": tool_message}, as_node="human_feedback")
-        print ("I am in process_confirmed_query. curre_chain_input")
         print ("process_confirmed_query", gd.app.get_state(config))
         #app.stream(None, config, stream_mode="values")
-        print ("run")
         events = list(gd.app.stream(None, config, stream_mode="values"))
         #print ("events", events)
         last_event = events[-1]
@@ -129,18 +134,22 @@ def handle_confirmation_result(confirmation_result):
 def run_chatbot():
     """Main function to run the chatbot interface"""
     # Configure the sidebar
+
     with st.sidebar:
         st.markdown("### Example queries you can try:")
         create_example_buttons()
-    
     # Main chat interface
     st.title("DrugBot 💊")
     
     # Initialize session state
     init_session_state()
+
+    print ("********************At the beginning st.session_state", st.session_state)
     
     # Display chat messages in main area
     display_chat_messages()
+
+    
     
     # Handle confirmation UI if needed
     if st.session_state.awaiting_confirmation:
@@ -151,7 +160,8 @@ def run_chatbot():
             st.rerun()
     
     # Create columns for chat input and dropdown
-    input_col, dropdown_col = st.columns([5, 1])
+    input_col, dropdown_col, is_expanded_col = st.columns([5, 1, 1])
+    #input_col, dropdown_col = st.columns([5, 1])
     
     with input_col:
         prompt = st.chat_input(
@@ -161,23 +171,41 @@ def run_chatbot():
     
     with dropdown_col:
         user_tool = st.selectbox(
-            "",
+            "Tools to select:",
             options=["Automatic", "SQL", "Graph", "Vector", "Fulltext", "Mimicking"],
             key="tool_selector",
             label_visibility="collapsed"
         )
+
+    with is_expanded_col:
+        is_expanded_checkbox = st.checkbox(
+            "Medical terms to UMLS",
+            key="is_expanded"
+        )
     
+
     if prompt:
-        input_message = HumanMessage(content=prompt, tool_choice=user_tool.lower())
-        
+
+
+        #print ("input_message", input_message)
         try:
+            expanded_prompt = prompt
+
+            if is_expanded_checkbox:
+                with st.spinner("Querying UMLS..."):        
+                    expanded_prompt = expand_question(prompt)
+            
+            input_message = HumanMessage(content=expanded_prompt, tool_choice=user_tool.lower())
+
             with st.spinner("Processing response..."):
+                #st.session_state.messages.append(HumanMessage(content=input_message.content))
+                st.session_state.messages.append(HumanMessage(content=prompt))
                 for event in gd.app.stream({"messages": [input_message]}, config, stream_mode="values"):
                     print ("len:", len(event["messages"]))
                 
                 #print ("in try if prompt", app.get_state(config).values["messages"])
 
-                st.session_state.messages.append(HumanMessage(content=input_message.content))
+                
                 #st.session_state.tool_name = "clarifying"
                 #print ("!!!!!!!!!!!!!!!!!!!!!!gd.app.get_state(config).values", gd.app.get_state(config).values)
                 generated_message = gd.app.get_state(config).values["messages"][-1]
@@ -188,7 +216,7 @@ def run_chatbot():
                     tool_call_id = "dummy_tool_id"
                     
                     print ("=================================================tool_name", tool_name, "tool_call_id", tool_call_id)
-                    process_chain_response(generated_message.content, tool_name, tool_call_id, prompt)
+                    process_chain_response(generated_message.content, tool_name, tool_call_id, expanded_prompt)
                 elif isinstance(generated_message, ToolMessage):
                     print ("============================ in prompt, toolmessage, generated_message",  generated_message)
                     generated_query = generated_message.content
@@ -196,12 +224,17 @@ def run_chatbot():
                     tool_name = generated_message.name
                     tool_call_id = generated_message.tool_call_id
                 
-                    process_chain_response(generated_query, tool_name, tool_call_id, prompt)
+                    process_chain_response(generated_query, tool_name, tool_call_id, expanded_prompt)
         except Exception as e:
             st.error(f"Error: {str(e)}")
         st.rerun()
 
 if __name__ == "__main__":
+
+    # checkpoint = "checkpoints.db"
+    # if os.path.isfile(checkpoint):
+    #     os.remove(checkpoint)
+
     st.set_page_config(
         page_title="DrugBot",
         page_icon="💊",

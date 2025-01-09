@@ -21,7 +21,7 @@ def create_query_confirmation_ui() -> str | None:
         icon_b64 = svg_to_base64(tool_icon.strip())
         description = TOOL_DESCRIPTIONS.get(st.session_state.tool_name, "")
         
-        print ("st.session_state.tool_name", st.session_state.tool_name)
+        #print ("st.session_state.tool_name", st.session_state.tool_name)
         
         
         ###### AI cannot answer the question without some claification
@@ -63,9 +63,11 @@ def create_query_confirmation_ui() -> str | None:
             
             # Code editor
             #editor_response = st_ace(language='sql', value=st.session_state.current_query)
-            query_to_edit = sqlparse.format(st.session_state.current_query, reindent=True, keyword_case='upper')
+            print ("--------before query_to_edit. st.session_state", st.session_state)
+            #query_to_edit = f"/*{st.session_state.current_chain_input}*/"
+            query_to_edit = sqlparse.format(f"/*{st.session_state.current_chain_input}*/\n" + st.session_state.current_query, reindent=True, keyword_case='upper')
             if st.session_state.tool_name == "graph":
-                query_to_edit = st.session_state.current_query
+                query_to_edit = f"/*{st.session_state.current_chain_input}*/\n" + st.session_state.current_query
             editor_response = st_monaco(value=query_to_edit, height="150px", language="sql")
             
             # Add spacing after code editor

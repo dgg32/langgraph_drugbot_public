@@ -56,8 +56,7 @@ def create_tool_args(executed_query: str) -> Dict[str, str]:
     return {
         "query": st.session_state.current_query,
         "executed_query": executed_query,
-        "my_question": st.session_state.current_chain_input,
-        "original_query": st.session_state.current_chain_input
+        "original_question": st.session_state.current_chain_input
     }
 
 def generate_tool_call_id() -> str:

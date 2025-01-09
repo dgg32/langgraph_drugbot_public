@@ -1,10 +1,12 @@
 #import duckdb
+import streamlit as st
 from langchain_community.utilities import SQLDatabase
-from langchain_openai import ChatOpenAI
+#from langchain_openai import ChatOpenAI
 import yaml
-import os
+#import os
 from langchain_core.example_selectors import SemanticSimilarityExampleSelector
-from langchain_openai import OpenAIEmbeddings
+#from langchain_openai import OpenAIEmbeddings
+from langchain_openai import AzureOpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 #from operator import itemgetter
 #from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
@@ -16,6 +18,7 @@ import duckdb
 import json
 from langchain_community.vectorstores import LanceDB
 from langchain.chains import create_sql_query_chain
+from typing import Dict
 #from langchain_core.messages import AIMessage
 # from langchain_core.runnables import (
 #     Runnable,
@@ -23,7 +26,13 @@ from langchain.chains import create_sql_query_chain
 #     RunnableMap,
 #     RunnablePassthrough,
 # )
+
+import utils.umls_mapper as umls_mapper
 import my_db_specifics as my_db_specifics
+import utils.my_llm as my_llm
+
+
+print ("---my_langchain_tools---, st.session_state", st.session_state)
 
 with open("config.yaml", "r") as stream:
     try:
@@ -31,9 +40,28 @@ with open("config.yaml", "r") as stream:
     except yaml.YAMLError as exc:
         print(exc)
 
-# Set up your OpenAI API key
-os.environ["OPENAI_API_KEY"] = PARAM['openai_api']
-llm = ChatOpenAI(model_name="gpt-4o-mini")
+
+
+
+def expand_question(question: str) -> str:
+    """Expand the original question with the extracted medical terms."""
+    #print ("---expand_question---")
+    #messages = filter_messages(state["messages"])
+
+    print ("---expand_question---\n question:", question)
+    terms = umls_mapper.term_extractor(question)
+
+    print ("---expand_question---\n terms:", terms)
+
+    umls_terms = umls_mapper.entity_recognition(terms)
+            
+    expanded_version = question
+    for t in umls_terms:
+
+        expanded_version = expanded_version.replace(t, f"{umls_terms[t]['name']} (CUI: {umls_terms[t]['cui']})")
+
+    
+    return expanded_version
 
 @tool
 def mimicking(question: str, top_k: int):
@@ -54,7 +82,7 @@ def mimicking(question: str, top_k: int):
     print ("before example_selector")
     example_selector = SemanticSimilarityExampleSelector.from_examples(
         examples,
-        OpenAIEmbeddings(),
+        my_llm.embeddings,
         LanceDB,
         k=5,
         input_keys=["input"],
@@ -66,6 +94,7 @@ def mimicking(question: str, top_k: int):
         example_selector=example_selector,
         example_prompt=example_prompt,
         prefix="""You are a duckdb expert. Given an input question, take the examples as templates, and only substitute the template variables with those extracted from the question. Closely mimicing the examples and don't modify the examplar structure easily, since they are curated by human. Add a 'LIMIT {top_k}' clause to the end of the query. \n\nHere is the relevant table info: {table_info}\n\nBelow are a number of examples of questions and their corresponding queries. Use them to as inspiration generate your query.
+        In the question, if you see the '(CUI: xxx)' is present after a medical term, instead of the term, use the that CUI to write your query.
         - Almost always start with SELECT, unless it is a graph query.
         - The subquery in FROM clause should have an alias, without the keyword AS, Here is an example: SELECT * FROM Trials, GRAPH_TABLE( ... )  drug_for_disease WHERE Trials.drug_cui = drug_for_disease.drug_cui
         - If the search term contains a single quote, it should be escaped with another single quote. For example, 'Alzheimer's Disease' should be 'Alzheimer''s Disease'.
@@ -84,7 +113,7 @@ def mimicking(question: str, top_k: int):
     print ("before generate_query")
     generate_query = (
         complex_generation_prompt
-        | llm | StrOutputParser()
+        | my_llm.llm | StrOutputParser()
     )
 
     query = generate_query.invoke({"input": question, "table_info": database_description, "top_k": top_k})
@@ -95,8 +124,9 @@ def mimicking(question: str, top_k: int):
 @tool
 def sql(question: str, top_k: int):
     """ Use the SQL route to get the answer from the database. It can find data across all tables. Consider it as the default tool. top_k is the number of results to return."""
-    print ("==== sql ====")
+    
     print ("sql question", question, "top_k", top_k)
+    #print ("sql umls_terms", umls_terms)
     database_description = my_db_specifics.sql_database_prompt
     
     examples = my_db_specifics.sql_examples
@@ -104,18 +134,20 @@ def sql(question: str, top_k: int):
 
     example_selector = SemanticSimilarityExampleSelector.from_examples(
         examples,
-        OpenAIEmbeddings(),
+        my_llm.embeddings,
         LanceDB,
         k=5,
         input_keys=["input"],
     )
-
+    print ("==== sql ====")
+    
     example_prompt = PromptTemplate.from_template("User input: {input}\nSQL query: {query}")
     sql_generation_prompt = FewShotPromptTemplate(
         example_selector=example_selector,
         example_prompt=example_prompt,
         prefix="""You are a DuckDB expert. Given an input question, create a syntactically correct DuckDB query to run. Ignore the {top_k} parameter for now.
         Here is the relevant table info: {table_info}
+        In the question, if you see the '(CUI: xxx)' is present after a medical term, instead of the term, use the that CUI to write your query.
         - If the search term contains a single quote, it should be escaped with another single quote. For example, 'Alzheimer's Disease' should be 'Alzheimer''s Disease'.
         - Only return SQL Query not anything else like ```sql ... ```
         - Using NOT IN with NULL values
@@ -141,13 +173,10 @@ def sql(question: str, top_k: int):
     db = SQLDatabase(engine=engine)
 
     #db = SQLDatabase.from_uri('duckdb:///' + PARAM['drugdb_path'])
-    write_query = create_sql_query_chain(llm, db, sql_generation_prompt)
+    write_query = create_sql_query_chain(my_llm.llm, db, sql_generation_prompt)
     print ("write_query", write_query)
 
-    # generate_query = (
-    #     write_query
-    #     | llm | StrOutputParser()
-    # )
+
     
     sql_query = write_query.invoke({"question": question, "table_info": database_description, "top_k": top_k})
     sql_query = sql_query.strip()
@@ -172,13 +201,14 @@ def graph(question: str, top_k: int):
     """Use the graph query language route to get the answer from the database. Only suitable for questions that involve the interrelationship between the Drugs, Disorders, and MOA tables. top_k is the number of results to return."""
 
     print ("++++++++++++++++question", question, "top_k", top_k)
+    
     database_description = my_db_specifics.graph_database_prompt
     print ("before examples")
     examples = my_db_specifics.graph_examples
     print ("before example_selector")
     example_selector = SemanticSimilarityExampleSelector.from_examples(
         examples,
-        OpenAIEmbeddings(),
+        my_llm.embeddings,
         LanceDB,
         k=5,
         input_keys=["input"]
@@ -192,6 +222,7 @@ def graph(question: str, top_k: int):
         example_prompt=example_prompt,
         prefix="""You are a DuckPGQ expert. Given an input question, create a syntactically correct graph query to run.
         Here is the relevant table info: {table_info}
+        In the question, if you see the '(CUI: xxx)' is present after a medical term, instead of the term, use the that CUI to write your query.
         DuckPGQ is very similar to Cypher. But there are some differences.
         Double check the user's DuckPGQ graph query for common mistakes, including:
         - If the search term contains a single quote, it should be escaped with another single quote. For example, 'Alzheimer's Disease' should be 'Alzheimer''s Disease'.
@@ -214,7 +245,7 @@ def graph(question: str, top_k: int):
 
     generate_query = (
         pgq_generation_prompt
-        | llm | StrOutputParser()
+        | my_llm.llm | StrOutputParser()
     )
 
     graph_query = generate_query.invoke({"input": question, "table_info": database_description, "top_k": top_k})
@@ -241,10 +272,9 @@ def vector(question: str, top_k: int = 5) -> str:
 @tool
 def fulltext(question: str, top_k: int = 10) -> str:
     """Use the full text search to get the trials from the database. Only suitable for questions that involve the StudyTitle. Use this tool when users question does not read like a sentence and looks like some keywords instead. Keep the original query for the user's reference. And keep all the operators such as &, |, and ! in the query."""
-    #print ("original_query", original_query)
     field_with_full_text_search = "StudyTitle"
 
-    generate_query = my_db_specifics.full_text_search_query_template.format(original_query=question.replace("'", "''"), field=field_with_full_text_search, limit=top_k)
+    generate_query = my_db_specifics.full_text_search_query_template.format(original_question=question.replace("'", "''"), field=field_with_full_text_search, limit=top_k)
 
     
     return generate_query
@@ -269,6 +299,7 @@ def execute_query_and_answer(state):
         #print ("execute_query_and_answer.m", m)
         if m.type == "ai" and len(question) == 0:
             if len(m.content.strip()) == 0:
+                print ("---execute_query_and_answer---   m", m)  
                 question = json.loads(m.additional_kwargs["tool_calls"][0]["function"]["arguments"])["question"]
         elif m.type == "human" and len(query) == 0:
             #print ("m.content", m.content)
@@ -283,7 +314,8 @@ def execute_query_and_answer(state):
     #pass
 
     def embeddings(document: str) -> list[float]:
-        result = OpenAIEmbeddings(model=PARAM['vector_embedding_model']).embed_query(document)
+        #result = my_llm.embeddings(model=PARAM['vector_embedding_model']).embed_query(document)
+        result = my_llm.embeddings.embed_query(document)
         return result
     
     con = duckdb.connect(PARAM['drugdb_path'], config = {"allow_unsigned_extensions": "true"})
@@ -296,10 +328,10 @@ def execute_query_and_answer(state):
         con.sql(c)
 
     # # Answer
-    print ("question", question)
     print ("query", query)
+
     execute_result = con.sql(query).fetchall()
-    #print ("execute_result", execute_result)
+    print ("execute_result", execute_result)
     
     
     final_response = ""
@@ -316,7 +348,7 @@ def execute_query_and_answer(state):
 
         formulate_human_readable_answer = (
         answer_prompt
-        | llm
+        | my_llm.llm
         | StrOutputParser()
         )
 
@@ -326,10 +358,11 @@ def execute_query_and_answer(state):
 
     tool_call_id = ""
     for m in state["messages"][::-1]:
-        print ("m", m.type, m)
+        #print ("m", m.type, m)
         if m.type == "tool":
             tool_call_id = m.tool_call_id
             break
     #print ("in execute_query_and_answer tool_calls = state['messages'][-1].tool_calls", tool_calls[0]['id'])
     print ("return tool_call_id", tool_call_id)
+    #print ("return final_response", final_response)
     return {"messages": {"question": question, "query": query, "execute_result": execute_result, "role": "assistant", "content": final_response, "tool_call_id":tool_call_id}}

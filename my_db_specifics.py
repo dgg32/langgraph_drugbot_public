@@ -157,6 +157,16 @@ graph_examples = [
                     """,
             "tool_name": "graph"
         },
+        {
+            "input": "What drugs' names contain the 'libenclam'?",
+            "query": """FROM GRAPH_TABLE (drug_graph
+                MATCH (i:Drug WHERE LOWER(i.name) LIKE '%' || LOWER('libenclam') || '%')
+                COLUMNS (i.name AS drug_name)
+                );              
+                    """,
+            "tool_name": "graph"
+        }
+        
     ]
 
 graph_database_prompt = """
@@ -217,7 +227,7 @@ full_text_search_query_template = """SELECT PostingID as trial_id, StudyTitle, s
     FROM (
         SELECT *, fts_main_Trials.match_bm25(
             PostingID,
-            '{original_query}',
+            '{original_question}',
             fields := '{field}'
         ) AS score
         FROM Trials

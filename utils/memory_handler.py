@@ -5,6 +5,7 @@ import uuid
 from langchain_core.messages import SystemMessage, merge_message_runs
 from langchain_openai import ChatOpenAI
 import streamlit as st
+import utils.my_llm as my_llm
 
 class Concept(BaseModel):
     """This is the user-defined concepts"""
@@ -15,10 +16,11 @@ class Concept(BaseModel):
     )
 
 
-model = ChatOpenAI(model="gpt-4o", temperature=0)
+#model = ChatOpenAI(model="gpt-4o", temperature=0)
 
 concept_extractor = create_extractor(
-    model,
+    #model,
+    my_llm.llm,
     tools=[Concept],
     tool_choice="Concept",
     enable_inserts=True,

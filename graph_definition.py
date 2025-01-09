@@ -4,21 +4,21 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, StateGraph, MessagesState, START
 import utils.my_langchain_tools as my_langchain_tools
 import sqlite3
-from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.store.memory import InMemoryStore
-from typing import TypedDict, Literal
-
+from typing import TypedDict, Literal, Dict
 from langchain_openai import ChatOpenAI
-
+import streamlit as st
 from langchain_core.messages import trim_messages
 
 import utils.memory_handler as my_memory
 
-from langchain_core.messages import SystemMessage, ToolMessage
+from langchain_core.messages import SystemMessage, ToolMessage, HumanMessage, AIMessage
 
+import json
+import utils.my_llm as my_llm
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+#llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 
 all_tools = [my_langchain_tools.sql, my_langchain_tools.graph, my_langchain_tools.mimicking, my_langchain_tools.vector, my_langchain_tools.fulltext]
@@ -27,98 +27,86 @@ all_tools_category = {"sql": [my_langchain_tools.sql], "graph": [my_langchain_to
 
 class State(MessagesState):
     selected_tools: list[str]
+    #umls_terms: Dict[str, str]
+
 
 
 # Define the function that calls the model
-def agent(state, config, store):
-    MODEL_SYSTEM_MESSAGE = """You are a helpful assistant tasked with performing RAG with a drug-trial DuckDB as backend. 
-                            Capture both the question and the amount of results 'top_k' that the user want to see. If the user does not specify the amount, set top_k = 30.
-                            Only one query for one question. Do not break the question into multiple queries.
+def choose_query_tool(state, config, store):
+    MODEL_SYSTEM_MESSAGE = """You are a helpful assistant tasked with performing Q&A with a drug-trial DuckDB as backend.
+                            Your task is to call the right query tool and forward the user's question to it.
+                            IMPORTANT: do not modify or generate a query yourself. That is the job of the query tools.
+                            Capture both the question and the amount of results 'top_k' that the user want to see. If the user does not specify the amount, don't ask the user back to clarify and just set top_k = 30.
+                            Only one query tool for one question. Do not break the question into multiple parts.
                             If the user has defined some concepts or terms, use them in your query faithfully to personalize your responses.
                             Here is the memory (it may be empty): {memory}"""
-    print ("---call_tool_to_generate_query---")
 
-    #messages = filter_messages(state["messages"])
-    #print ("after len", len(messages))
-
-    # Define nodes and conditional edges
+    print("---call_tool_to_generate_query---")
+    
+    # Get selected tools
     selected_tools = state["selected_tools"]
-
     obj_tools = []
     for t in selected_tools:
         if t in all_tools_category:
             obj_tools = all_tools_category[t]
-
-    #print ("selected_tools", obj_tools)
-
-    #model = llm.bind_tools(tools + [AskHuman])
-    print ("---call_tool_to_generate_query---\nobj_tools:", obj_tools)
-    model = llm.bind_tools(obj_tools)
-
-    user_id = config["configurable"]["user_id"]
-
-    # Define the namespace for the memories
-    namespace = ("concept", user_id)
-
-    # Retrieve the most recent memories for context
-    existing_items = store.search(namespace)
-
-    # Format the existing memories for the Trustcall extractor
-    existing_memories = ([existing_item.value
-                          for existing_item in existing_items]
-                          if existing_items
-                          else None
-                        )
     
-    print ("existing_memories", existing_memories)
+    print("---call_tool_to_generate_query---\nobj_tools:", obj_tools)
+    model = my_llm.llm.bind_tools(obj_tools)
+    
+    # Get user context and memories
+    user_id = config["configurable"]["user_id"]
+    namespace = ("concept", user_id)
+    existing_items = store.search(namespace)
+    existing_memories = ([existing_item.value
+                         for existing_item in existing_items]
+                         if existing_items
+                         else None)
+    
+    # Format memories
     format_memories = "\n"
     if existing_memories:
         for memo in existing_memories:
-            format_memories += f" {memo.get('name')}: {str(memo.get('items'))}\n" 
+            format_memories += f" {memo.get('name')}: {str(memo.get('items'))}\n"
     
-    #print ("++++++++---In agent\nexisting_memories:", format_memories)
+    # Prepare messages
     system_msg = MODEL_SYSTEM_MESSAGE.format(memory=format_memories)
-
-    #messages = filter_messages(state["messages"])
     messages = state["messages"]
-    print ("++++++++---In agent\nmessages:", messages)
+    print("++++++++---In choose_query_tool\nmessages:", messages)
+    
+    # Get recent message history
     last_human_msg = []
     for m in messages[::-1]:
-        if m.type == "human" or m.type == "ai":
-            #last_human_msg.prepend(m)
-            if m.content.strip() != "":
-                last_human_msg.insert(0, m.content)
-
+        if m.type in ["human", "ai"]:
+            if m.content.strip():
+                last_human_msg.insert(0, m)
             if len(last_human_msg) == 10:
                 break
     
-    print ("++++++++---last_msg", last_human_msg)
-    print ("++++++++---In agent\nsystem_msg", [SystemMessage(content=system_msg)] + last_human_msg)
-    #response = model.invoke([SystemMessage(content=system_msg)] + messages)
-    response = model.invoke([SystemMessage(content=system_msg)] + last_human_msg)
-    print ("++++++++---In agent, agent_response", response)
-    # We return a list, because this will get added to the existing list
-    #return {"messages": [model.invoke([sys_msg] + messages)]}
-    return {"messages": [response]}
+    print("++++++++---last_msg", last_human_msg)
+    
+    # Get tool selection from the model
+    tool_selection = model.invoke([SystemMessage(content=system_msg)] + last_human_msg)
+    print("++++++++---In choose_query_tool, tool_selection:", tool_selection)
+
+    
+    return {"messages": [tool_selection]}
 
 
-def select_query_tool(state, config, store):
+def limit_query_tool(state, config, store):
     """ You have five tools to choose from to answer the user's question. 
     sql covers all the tables and should be prefered. 
     graph covers the relationships among drugs, disorders and MOA. 
     vector covers the disorder definition. 
     fulltext covers the trials' StudyTitles. 
     mimicking uses user defined query templates and is good for complex queries. automatic means you choose the best tool."""
-    print ("---select_query_tool---")
+    print ("---limit_query_tool---")
     tool_call_id = ""
     for m in state["messages"][::-1]:
         if m.type == "ai":
-            #print ("---select_query_tool---", m.type, m)
+            #print ("---limit_query_tool---", m.type, m)
             tool_call_id = m.additional_kwargs["tool_calls"][0]["id"]
             break
 
-    
-    #last_msg = state["messages"][-1].additional_kwargs["tool_calls"][0]["id"]
 
     print ("I captured the tool_call_id", tool_call_id)
     state["messages"].append(ToolMessage(content='', tool_call_id=tool_call_id))
@@ -131,9 +119,6 @@ def select_query_tool(state, config, store):
             else:
                 return {"selected_tools": ["automatic"]}
     #return {"selected_tools": }
-
-
-
 
 MODEL_SYSTEM_MESSAGE = """You are a helpful chatbot. 
 
@@ -151,16 +136,16 @@ Here are your instructions for reasoning about the user's messages:
 
 1. Reason carefully about the user's messages as presented below. 
 
-2. Must take one and only one of the following actions, never more than one!!!!!!!:
+2. Must take one and only one of the following actions, never more than one!!!!!!! Do NOT try to answer the question yourself, it is the job of the query tools:
 - If the message looks like a definition, update the user's definition by calling the update_concept tool
-- If the message looks like a question or a request, use the select_query_tool to generate a query
+- If the message looks like a question or a request, use the limit_query_tool route to generate a query
 
 3. Tell the user that you have updated your memory, if appropriate:
 - Tell the user them when you update the concept list"""
 
 class Choose_Direction(TypedDict):
     """ Decision on which route to go next """
-    action_type: Literal['update_concept', 'select_query_tool']
+    action_type: Literal['update_concept', 'limit_query_tool']
 
 def select_intent(state, config, store):
     """Load user defined concepts from the store and use them to personalize the chatbot's response."""
@@ -186,18 +171,17 @@ def select_intent(state, config, store):
     #messages = filter_messages(state["messages"])
 
     #messages = state["messages"]
-    messages = trim_messages(
-            state["messages"],
-            max_tokens=32000,
-            strategy="last",
-            token_counter=ChatOpenAI(model="gpt-4o"),
-            allow_partial=False,
-        )
+    # messages = trim_messages(
+    #         state["messages"],
+    #         max_tokens=32000,
+    #         strategy="last",
+    #         token_counter=ChatOpenAI(model="gpt-4o"),
+    #         allow_partial=False,
+    #     )
     #messages = filter_messages(state["messages"])
     #response = llm.bind_tools([Choose_Direction], parallel_tool_calls=False).invoke([SystemMessage(content=system_msg)]+state["messages"])
 
-    response = llm.bind_tools([Choose_Direction], parallel_tool_calls=False).invoke([SystemMessage(content=system_msg)] + messages)
-    #response = llm.bind_tools([update_concept, select_query_tool]).invoke([SystemMessage(content=system_msg)]+state["messages"])
+    response = my_llm.llm.bind_tools([Choose_Direction], parallel_tool_calls=False).invoke([SystemMessage(content=system_msg)] + state["messages"])
 
     print ("---select_intent---\nresponse: ", response)
     #print ("+++++---select_intent---+++\nresponse: ", response, "\nconfig: ", config, "\nstore: ", store)
@@ -205,7 +189,7 @@ def select_intent(state, config, store):
 
 
 
-def route_message(state, config, store) -> Literal[END, "update_concept", "select_query_tool"]:
+def route_message(state, config, store) -> Literal[END, "update_concept", "limit_query_tool"]:
 
     """Reflect on the memories and chat history to decide whether to update the memory collection."""
     message = state['messages'][-1]
@@ -219,9 +203,9 @@ def route_message(state, config, store) -> Literal[END, "update_concept", "selec
         if tool_call['args']["action_type"] == "update_concept":
             print ("***********update_concept")
             return "update_concept"
-        elif tool_call['args']["action_type"] == "select_query_tool":
-            print ("***********select_query_tool")
-            return "select_query_tool"
+        elif tool_call['args']["action_type"] == "limit_query_tool":
+            print ("***********limit_query_tool")
+            return "limit_query_tool"
         else:
             raise ValueError
 
@@ -236,12 +220,14 @@ builder = StateGraph(State)
 # Define the three nodes we will cycle between
 
 builder.add_node("select_intent", select_intent)
-#intents = ToolNode(my_memory.update_concept, select_query_tool)
+
 #builder.add_node("intents", intents)
 
 builder.add_node("update_concept", my_memory.update_concept)
-builder.add_node("select_query_tool", select_query_tool)
-builder.add_node("agent", agent)
+
+
+builder.add_node("limit_query_tool", limit_query_tool)
+builder.add_node("choose_query_tool", choose_query_tool)
 tool_node = ToolNode(all_tools)
 builder.add_node("tools", tool_node)
 #workflow.add_node("ask_human", ask_human)
@@ -252,13 +238,13 @@ builder.add_edge(START, "select_intent")
 builder.add_conditional_edges("select_intent", route_message)
 builder.add_edge("update_concept", END)
 
-builder.add_edge("select_query_tool", "agent")
-builder.add_conditional_edges("agent", tools_condition, path_map=["tools", "__end__"])
+builder.add_edge("limit_query_tool", "choose_query_tool")
+builder.add_conditional_edges("choose_query_tool", tools_condition, path_map=["tools", "__end__"])
 
 #workflow.add_edge("tools", "execute_query_and_answer")
 builder.add_edge("tools", "human_feedback")
 
-# After we get back the human response, we go back to the agent
+# After we get back the human response, we go back to the choose_query_tool
 builder.add_edge("human_feedback", "execute_query_and_answer")
 
 builder.add_edge("execute_query_and_answer", END)

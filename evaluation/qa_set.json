@@ -1,0 +1,92 @@
+[
+  {
+    "question": "What is the MOA of hydroflumethiazide?",
+    "query": "FROM GRAPH_TABLE (drug_graph\n    MATCH\n        (d:Drug WHERE LOWER(d.name) = LOWER('hydroflumethiazide'))-[h:HAS_MOA]->(m:MOA)\n COLUMNS (m.name AS moa_name)\n    ) LIMIT 30;",
+    "expected_answer": "Sodium Chloride Symporter Inhibitors",
+    "draft_query": "FROM GRAPH_TABLE (drug_graph\n    MATCH\n        (d:Drug WHERE LOWER(d.name) = LOWER('hydroflumethiazide'))-[h:HAS_MOA]->(m:MOA)\n COLUMNS (m.name AS moa_name)) LIMIT 5;",
+    "generated_answer": "The mechanism of action (MOA) of hydroflumethiazide is categorized as follows: Inhibitor Type: Sodium Chloride Symporter Inhibitors. This indicates that hydroflumethiazide works by inhibiting the sodium chloride symporter."
+  },
+  {
+    "question": "What diseases can hydroflumethiazide treat?", 
+    "query": "FROM GRAPH_TABLE (drug_graph  \n    MATCH  \n        (i:Drug WHERE LOWER(i.name) = LOWER('hydroflumethiazide'))-[m:MAY_TREAT]->(c:Disorder)  \n    COLUMNS (c.name AS disorder_name)) LIMIT 30;",
+    "expected_answer": "Hypertensive disease, Glomerulonephritis, Heart failure, Edema, Kidney Failure, Nephrotic Syndrome, Liver Cirrhosis",
+    "draft_query": "FROM GRAPH_TABLE (drug_graph  \n    MATCH  \n        (i:Drug WHERE LOWER(i.name) = LOWER('hydroflumethiazide'))-[m:MAY_TREAT]->(c:Disorder)  \n    COLUMNS (c.name AS disorder_name)  \n    ) \n LIMIT 30;",
+    "generated_answer": "Hypertensive disease\nGlomerulonephritis\nHeart failure\nEdema\nKidney Failure\nNephrotic Syndrome"
+  },
+  {
+    "question": "Can fluocinolone acetonide treat Facial Dermatoses?",
+    "query":"FROM GRAPH_TABLE (drug_graph  \n(i:Drug WHERE LOWER(i.name) = LOWER('fluocinolone acetonide'))-[m:MAY_TREAT]->(c:Disorder)  \n  COLUMNS (c.name AS disorder_name)  \n    ) \nLIMIT 4;",
+    "expected_answer": "Yes",
+    "draft_query": "FROM GRAPH_TABLE (drug_graph  \n(i:Drug WHERE LOWER(i.name) = LOWER('fluocinolone acetonide'))-[m:MAY_TREAT]->(c:Disorder)  \n  COLUMNS (c.name AS disorder_name)  \n    ) \nLIMIT 4;",
+    "generated_answer": "Leg Dermatoses\nPsoriasis\nPruritus\nFacial Dermatoses"
+  },
+  {
+    "question": "What is the MOA of abiraterone?",
+    "query": "SELECT MOA.name\n FROM DrugMOA,\n     Drug,\n     MOA\n WHERE DrugMOA.drug_cui = Drug.drug_cui\n  AND DrugMOA.moa_id = MOA.moa_id\n  AND LOWER(Drug.name) = LOWER('abiraterone');",
+    "expected_answer": "Cytochrome P450 17A1 Inhibitors, Cytochrome P450 2D6 Inhibitors, Cytochrome P450 2C8 Inhibitors",
+    "draft_query": "SELECT MOA.name\n FROM DrugMOA,\n     Drug,\n     MOA\n WHERE DrugMOA.drug_cui = Drug.drug_cui\n  AND DrugMOA.moa_id = MOA.moa_id\n  AND LOWER(Drug.name) = LOWER('abiraterone');",
+    "generated_answer": "Based on the query results, here is a formatted presentation of the information:\n### Diseases Related to Fluocinolone Acetonide\n| Disease/Condition                  |\n|------------------------------------|\n| Cytochrome P450 17A1 Inhibitors    |\n| Cytochrome P450 2D6 Inhibitors     |\n| Cytochrome P450 2C8 Inhibitors     | \nThese entries represent types of inhibitors associated with fluocinolone acetonide."
+  },
+  {
+    "question": "double blind & Alzheimer's disease",
+    "query": "SELECT PostingID AS trial_id, StudyTitle, score\n FROM (SELECT *,\n  fts_main_Trials.match_bm25(PostingID, 'double blind & Alzheimer''s disease', fields := 'StudyTitle') AS score\n   FROM Trials)\n WHERE score IS NOT NULL\n ORDER BY score DESC\n LIMIT 10;",
+    "expected_answer": "'A Preliminary, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 15-week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.', 'A 54-week, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Effects of Donepezil Hydrochloride (E2020) on Functional Outcomes in Patients with Alzheimer's Disease.'",
+    "draft_query": "SELECT PostingID AS trial_id, StudyTitle, score\n FROM (SELECT *,\n  fts_main_Trials.match_bm25(PostingID, 'double blind & Alzheimer''s disease', fields := 'StudyTitle') AS score\n   FROM Trials)\n WHERE score IS NOT NULL\n ORDER BY score DESC\n LIMIT 10;",
+    "generated_answer": "Here is a summary of the query results formatted into a table for easier understanding:\n| Study ID | Title                                                                                                               | Score          |\n|----------|---------------------------------------------------------------------------------------------------------------------|----------------|\n| 19971    | 'A Preliminary, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.' | 4.2411         |\n| 19972    | 'A 15-week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.'    | 4.2411         |\n| 19973    | 'A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.'    | 4.2411         |\n| 19974    | 'A 30-Week, Multi-Center, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Safety and Efficacy of E2020 in Patients with Alzheimer's Disease.'    | 4.2411         |\n| 19978    | 'A 54-week, Randomized, Double-Blind, Placebo-Controlled Evaluation of the Effects of Donepezil Hydrochloride (E2020) on Functional Outcomes in Patients with Alzheimer's Disease.' | 4.1484         |\n| 19977    | 'A Randomized, Double-Blind, Placebo-Controlled Evaluation of the Effects of Donepezil Hydrochloride (E2020) in the Management of Patients with Alzheimer's Disease in a Nursing Home Facility.' | 4.0597         |\n| 4688     | 'Efficacy and Safety of the Rivastigmine Transdermal Patch in Patients With Probable Alzheimer's Disease'          | 3.9494         |\n| 19970    | 'Clinical efficacy and safety of donepezil on cognitive and global function in patients with Alzheimer's disease. A 24-week, multicenter, double-blind, placebo-controlled study in Japan.' | 3.8931         |\n| 19980    | 'A 24-weeks, Multi-center, Randomized, Double-blind, Placebo Controlled Study to Evaluate the Efficacy and Safety of Donepezil Hydrochloride in Chinese Subjects With Severe Alzheimer's Disease' | 3.8148         |\n| 21103    | 'A 24-Week Efficacy, Safety and Tolerability of Rivastigmine Patch Study in Patients With Probable Alzheimer's Disease' | 3.7602         |\n This table lists various studies related to Alzheimer's disease that employed a double-blind methodology, along with their respective titles and scores."
+  },
+  {
+    "question": "What drug may treat type 2 diabetes?",
+    "generated_answer": "",
+    "expected_answer": "glibenclamide, insulin (human), acarbose, dulaglutide, insulin lispro, acetohexamide, insulin degludec, insulin aspart, linagliptin, pioglitazone, glimepiride, insulin glargine, empagliflozin, pramlintide, miglitol, repaglinide, tirzepatide, lixisenatide, rosiglitazone, insulin glulisine, glipizide, tolbutamide, tolazamide, canagliflozin, alogliptin, dapagliflozin, chlorpropamide, exenatide, saxagliptin, metformin"
+  },
+  {
+    "question": "What drug may treat 多発出血性肉腫?",
+    "generated_answer": "",
+    "expected_answer": "vinblastine, dactinomycin, peginterferon alfa-2b, alitretinoin, etoposide, interferon alfa-2b, interferon alfa-2a, peginterferon alfa-2a, paclitaxel, interferon alfacon-1, vinblastine sulfate, doxorubicin hydrochloride liposome"
+  },
+  {
+    "question": "多発出血性肉腫の治療薬について?",
+    "generated_answer": "",
+    "expected_answer": "vinblastine, dactinomycin, peginterferon alfa-2b, alitretinoin, etoposide, interferon alfa-2b, interferon alfa-2a, peginterferon alfa-2a, paclitaxel, interferon alfacon-1, vinblastine sulfate, doxorubicin hydrochloride liposome"
+  },
+  {
+    "question": "What disorder can 1,1-Dimethylbiguanide treat?",
+    "generated_answer": "",
+    "expected_answer": "Diabetes Mellitus, Non-Insulin-Dependent"
+  },
+  {
+    "question": "What diseases can aflibercept treat?",
+    "generated_answer": "Aflibercept can treat the following diseases:\n\n| Substance   | Condition             |\n|-------------|-----------------------|\n| aflibercept | Macular Edema         |\n| aflibercept | Diabetic Retinopathy  |",
+    "expected_answer": "macular edema and diabetic retinopathy"
+  },
+  {
+    "question": "Which substances can be used to treat Macular Edema?",
+    "generated_answer": "The substances that can be used to treat **Macular Edema** are:\n\n| Substance    | CUI       | ATC Codes                                      | ATC URLs                                                                                                     | Level |\n|--------------|-----------|------------------------------------------------|--------------------------------------------------------------------------------------------------------------|-------|\n| ranibizumab  | C1566537  | S01LA04                                        | [ATC/S01LA04](http://purl.bioontology.org/ontology/ATC/S01LA04)                                              | 5     |\n| aflibercept  | C1134659  | L01XX44, S01LA05                               | [ATC/L01XX44](http://purl.bioontology.org/ontology/ATC/L01XX44), [ATC/S01LA05](http://purl.bioontology.org/ontology/ATC/S01LA05) | 5     |\n| flurbiprofen | C0016377  | M01AE09, S01BC04, M02AA19, R02AX01             | [ATC/M01AE09](http://purl.bioontology.org/ontology/ATC/M01AE09), [ATC/S01BC04](http://purl.bioontology.org/ontology/ATC/S01BC04), [ATC/M02AA19](http://purl.bioontology.org/ontology/ATC/M02AA19), [ATC/R02AX01](http://purl.bioontology.org/ontology/ATC/R02AX01) | 5     |\n\n### Mechanisms of Action\n\n| Substance    | Mechanism of Action                                           |\n|--------------|---------------------------------------------------------------|\n| ranibizumab  | Vascular Endothelial Growth Factor Receptor Inhibitors        |\n| ranibizumab  | Vascular Endothelial Growth Factor-directed Antibody Interactions |\n| ranibizumab  | Vascular Endothelial Growth Factor Inhibitors                 |\n| aflibercept  | Vascular Endothelial Growth Factor Inhibitors                 |\n| flurbiprofen | Cyclooxygenase Inhibitors                                     |\n\n### Products Containing These Substances\n\n| Product Name                                                      | Substance    | Condition Name |\n|-------------------------------------------------------------------|--------------|----------------|\n| Eylea aflibercept (rch) 40 mg/mL solution for intravitreal injection vial | aflibercept  | Macular Edema  |\n| EYLEA 114.3 mg/ml solution for injection                          | aflibercept  | Macular Edema  |",
+    "expected_answer": "flurbiprofen, ranibizumab and aflibercept"
+  },
+  {
+    "question": "What ATC category does donepezil have?",
+    "generated_answer": "Donepezil belongs to the **Anticholinesterase anti-dementia drugs** category in the ATC classification system. Here are the details:\n\n| Substance                         | ATC Code | ATC Category                        | ATC URL                                             |\n|-----------------------------------|----------|-------------------------------------|-----------------------------------------------------|\n| donepezil                         | N06DA02  | Anticholinesterase anti-dementia drugs | [ATC N06DA](http://purl.bioontology.org/ontology/ATC/N06DA) |\n| donepezil and memantine           | N06DA52  | Anticholinesterase anti-dementia drugs | [ATC N06DA](http://purl.bioontology.org/ontology/ATC/N06DA) |\n| donepezil, memantine and Ginkgo folium | N06DA53  | Anticholinesterase anti-dementia drugs | [ATC N06DA](http://purl.bioontology.org/ontology/ATC/N06DA) |\n\nDonepezil is primarily used to treat **Alzheimer Disease**.",
+    "expected_answer": "N06DA02"
+  },
+  {
+    "question": "What kind of MOA does donepezil have?",
+    "generated_answer": "Donepezil is associated with the mechanism of action (MOA) of being a **Cholinesterase Inhibitor**.",
+    "expected_answer": "Cholinesterase Inhibitors"
+  },
+  {
+    "question": "Do acetohexamide and pioglitazone share an MOA? If yes, what is it?",
+    "generated_answer": "Yes, acetohexamide and pioglitazone share a mechanism of action (MOA). The shared MOA is **Insulin Receptor Agonists**.\n\nHere is a summary of the shared MOA:\n\n| Substance      | Shared MOA               |\n|----------------|--------------------------|\n| acetohexamide  | Insulin Receptor Agonists|\n| pioglitazone   | Insulin Receptor Agonists|",
+    "expected_answer": "Insulin Receptor Agonists"
+  },
+  {
+    "question": "Give me a substance that may treat Type 1 Diabetes and has \"glargine\" in its name",
+    "generated_answer": "A substance that may treat Type 1 Diabetes and has *glargine* in its name is **insulin glargine**.\n\nHere are some details about *insulin glargine*:\n\n| **Substance Name** | **ATC Code** | **Condition**                   | **Mechanism of Action**      |\n|--------------------|--------------|---------------------------------|------------------------------|\n| insulin glargine   | A10AE04      | Diabetes Mellitus, Type 1       | Insulin Receptor Agonists    |\n\nAdditionally, there is a product containing *insulin glargine*:\n\n| **Product Name**                              | **Chinese Name**                  | **License Number**                |\n|-----------------------------------------------|-----------------------------------|-----------------------------------|\n| Soliqua solution for injection 100 units+50\u03bcg | \u723d\u80f0\u9054\u6ce8\u5c04\u5291100\u55ae\u4f4d+50\u5fae\u514b          | \u885b\u90e8\u83cc\u75ab\u8f38\u5b57\u7b2c001080\u865f             |\n\nIf you need more information, feel free to ask!",
+    "expected_answer": "insulin glargine"
+  },
+  {
+    "question": "Which substance that may treat Type 1 Diabetes but does not have the MOA Insulin Receptor Agonists",
+    "generated_answer": "The substance that may treat **Diabetes Mellitus, Type 1** but does not have the **MOA Insulin Receptor Agonists** is **pramlintide**. \n\nHere is the detailed information:\n\n| Substance  | ATC Code  | CUI       | ATC URL                                              |\n|------------|-----------|-----------|------------------------------------------------------|\n| pramlintide | A10BX05   | C0537551  | [ATC A10BX05](http://purl.bioontology.org/ontology/ATC/A10BX05) |\n\n**Mechanism of Action**: Amylin Agonists",
+    "expected_answer": "pramlintide"
+  }
+]
